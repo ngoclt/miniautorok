@@ -1,21 +1,33 @@
 package life.coder.miniautorok.app
 
+import com.sun.javafx.css.Size
+import javafx.geometry.Pos
+import javafx.scene.paint.Color
+import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
-import tornadofx.Stylesheet
-import tornadofx.box
-import tornadofx.cssclass
-import tornadofx.px
+import tornadofx.*
 
 class Styles : Stylesheet() {
     companion object {
+        val container by cssclass()
         val heading by cssclass()
+        val title by cssclass()
     }
 
     init {
-        label and heading {
-            padding = box(10.px)
-            fontSize = 20.px
+        container {
+            alignment = Pos.TOP_CENTER
+            backgroundColor += Color.WHITE
+        }
+
+        imageView and heading {
+
+        }
+
+        label and title {
             fontWeight = FontWeight.BOLD
+            fontFamily = "Comic Sans MS"
+            fontSize = 24.px
         }
     }
 }
