@@ -1,0 +1,20 @@
+# Mac
+.DS_Store
+
+# Maven
+log/
+target/
+
+# Intellij
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+
+# Eclipse
+.classpath
+.project
+.settings/
