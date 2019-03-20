@@ -13,14 +13,25 @@ class Styles : Stylesheet() {
         val container by cssclass()
         val heading by cssclass()
         val title by cssclass()
+        val content by cssclass()
+
+        val wrapperColor = c("white", 0.5)
     }
 
     init {
+        heading {
+            spacing = 10.px
+        }
+
         container {
             alignment = Pos.TOP_CENTER
-            backgroundColor += Color.WHITE
             backgroundImage += URI("/background.jpg")
-            opacity = 0.7
+            padding = box(10.px)
+        }
+
+        content {
+            backgroundColor += wrapperColor
+            padding = box(10.px)
         }
 
         imageView and heading {

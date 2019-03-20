@@ -4,6 +4,7 @@ import javafx.scene.image.Image
 import javafx.stage.Stage
 import life.coder.miniautorok.app.scenes.MainView
 import life.coder.miniautorok.app.scenes.Styles
+import org.sikuli.basics.Settings
 import tornadofx.App
 
 class MiniApp: App(MainView::class, Styles::class) {
@@ -12,6 +13,7 @@ class MiniApp: App(MainView::class, Styles::class) {
         stage.height = 500.0
         stage.isResizable = false
         stage.icons += Image("icon.jpg")
+
         super.start(stage)
     }
 }

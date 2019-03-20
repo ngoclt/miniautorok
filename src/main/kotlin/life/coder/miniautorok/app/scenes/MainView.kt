@@ -1,8 +1,13 @@
 package life.coder.miniautorok.app.scenes
 
 import javafx.collections.FXCollections
+import javafx.scene.layout.Priority
 import life.coder.miniautorok.app.viewmodels.AppSettingsModel
+import org.sikuli.android.ADBClient
 import tornadofx.*
+
+import org.sikuli.android.ADBScreen
+import org.sikuli.basics.Settings
 
 class MainView : View("Mini Auto: RoK") {
 
@@ -11,6 +16,19 @@ class MainView : View("Mini Auto: RoK") {
     val resourceLevels = FXCollections.observableArrayList(1,
             2, 3, 4, 5, 6)
 
+    var devices = FXCollections.emptyObservableList<String>()
+
+    init {
+        Settings.DebugLogs = true
+        val adbScreen = ADBScreen("D:\\Program Files\\Nox\\bin\\nox_adb.exe")
+
+        ADBClient.get
+
+        devices = FXCollections.observableArrayList(adbScreen.devices.map { it.toString() })
+        print(adbScreen.devices)
+        print(adbScreen.device.toString())
+    }
+
     private val model = AppSettingsModel()
 
     override val root = vbox {
@@ -18,13 +36,15 @@ class MainView : View("Mini Auto: RoK") {
 
         imageview("images/rok_header.png") {
             addClass(Styles.heading)
-        }
 
-        label("Mini Auto v0.1") {
-            addClass(Styles.title)
+            vboxConstraints {
+                marginBottom = 10.0
+                vGrow = Priority.ALWAYS
+            }
         }
 
         form {
+            addClass(Styles.content)
             fieldset("Settings") {
                 field("Android SDK:") {
                     label(model.androidSdk)
@@ -33,6 +53,12 @@ class MainView : View("Mini Auto: RoK") {
                         action {
                             openSettings()
                         }
+                    }
+                }
+
+                field("Select Device:") {
+                    combobox<String> {
+                        items = devices
                     }
                 }
             }
