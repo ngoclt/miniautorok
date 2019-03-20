@@ -1,6 +1,7 @@
 package life.coder.miniautorok.app.scenes
 
 import javafx.collections.FXCollections
+import life.coder.miniautorok.app.viewmodels.AppSettingsModel
 import tornadofx.*
 
 class MainView : View("Mini Auto: RoK") {
@@ -9,6 +10,8 @@ class MainView : View("Mini Auto: RoK") {
             "Wood", "Stone", "Gold")
     val resourceLevels = FXCollections.observableArrayList(1,
             2, 3, 4, 5, 6)
+
+    private val model = AppSettingsModel()
 
     override val root = vbox {
         addClass(Styles.container)
@@ -22,6 +25,18 @@ class MainView : View("Mini Auto: RoK") {
         }
 
         form {
+            fieldset("Settings") {
+                field("Android SDK:") {
+                    label(model.androidSdk)
+
+                    button("Select") {
+                        action {
+                            openSettings()
+                        }
+                    }
+                }
+            }
+
             fieldset("Gathering") {
                 field("Type:") {
                     combobox<String> {
@@ -48,5 +63,10 @@ class MainView : View("Mini Auto: RoK") {
                 }
             }
         }
+    }
+
+    private fun openSettings() {
+        val settingsView = find<SettingsView>()
+        replaceWith(settingsView, sizeToScene = true, centerOnScreen = true)
     }
 }

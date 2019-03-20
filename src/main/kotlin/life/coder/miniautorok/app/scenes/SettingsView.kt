@@ -30,7 +30,13 @@ class SettingsView : View("Welcome to MiniAutoROK") {
         button("Save") {
             action {
                 model.commit()
+                openMain()
             }
         }
+    }
+
+    private fun openMain() {
+        val mainView = find<MainView>()
+        replaceWith(mainView, sizeToScene = true, centerOnScreen = true)
     }
 }

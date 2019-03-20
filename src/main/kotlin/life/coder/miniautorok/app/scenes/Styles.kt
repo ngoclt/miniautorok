@@ -6,6 +6,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import tornadofx.*
+import java.net.URI
 
 class Styles : Stylesheet() {
     companion object {
@@ -18,6 +19,8 @@ class Styles : Stylesheet() {
         container {
             alignment = Pos.TOP_CENTER
             backgroundColor += Color.WHITE
+            backgroundImage += URI("/background.jpg")
+            opacity = 0.7
         }
 
         imageView and heading {

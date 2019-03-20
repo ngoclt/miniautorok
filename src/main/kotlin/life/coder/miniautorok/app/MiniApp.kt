@@ -8,8 +8,8 @@ import tornadofx.App
 
 class MiniApp: App(MainView::class, Styles::class) {
     override fun start(stage: Stage) {
-        stage.width = 250.0
-        stage.height = 400.0
+        stage.width = 450.0
+        stage.height = 500.0
         stage.isResizable = false
         stage.icons += Image("icon.jpg")
         super.start(stage)
