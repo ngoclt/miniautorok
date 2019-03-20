@@ -1,4 +1,4 @@
-package life.coder.miniautorok.app
+package life.coder.miniautorok.app.scenes
 
 import javafx.collections.FXCollections
 import tornadofx.*

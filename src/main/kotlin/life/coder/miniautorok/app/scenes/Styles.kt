@@ -1,4 +1,4 @@
-package life.coder.miniautorok.app
+package life.coder.miniautorok.app.scenes
 
 import com.sun.javafx.css.Size
 import javafx.geometry.Pos
@@ -29,5 +29,7 @@ class Styles : Stylesheet() {
             fontFamily = "Comic Sans MS"
             fontSize = 24.px
         }
+
+
     }
 }

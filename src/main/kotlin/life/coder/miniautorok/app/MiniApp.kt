@@ -2,6 +2,8 @@ package life.coder.miniautorok.app
 
 import javafx.scene.image.Image
 import javafx.stage.Stage
+import life.coder.miniautorok.app.scenes.MainView
+import life.coder.miniautorok.app.scenes.Styles
 import tornadofx.App
 
 class MiniApp: App(MainView::class, Styles::class) {
