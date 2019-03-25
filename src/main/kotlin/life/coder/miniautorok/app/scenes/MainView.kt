@@ -9,7 +9,7 @@ import tornadofx.*
 import org.sikuli.android.ADBScreen
 import org.sikuli.basics.Settings
 import javafx.stage.Stage
-
+import life.coder.miniautorok.app.auto.GameController
 
 
 class MainView : View("Mini Auto: RoK") {
@@ -27,6 +27,8 @@ class MainView : View("Mini Auto: RoK") {
 
     init {
         Settings.DebugLogs = true
+        Settings.MinSimilarity = 0.9
+
         if (model.androidSdk.value.isNotEmpty()) {
             adbScreen = ADBScreen(model.androidSdk.value)
             device = adbScreen.device.toString()
@@ -94,19 +96,14 @@ class MainView : View("Mini Auto: RoK") {
         }
     }
 
-    private fun openSettings() {
-        val settingsView = find<SettingsView>()
-        replaceWith(settingsView, sizeToScene = true, centerOnScreen = true)
+    // Helper
+
+    private fun setupGameController() {
+        GameController.instance.setScreen(adbScreen)
+        GameController.instance.switchToMap()
     }
 
-    private fun showAlert(title: String, message: String) {
-        val alert = Alert(Alert.AlertType.ERROR)
-        val stage = alert.dialogPane.scene.window as Stage
-        stage.isAlwaysOnTop = true
-        alert.title = title
-        alert.contentText = message
-        alert.show()
-    }
+    // Actions
 
     private fun clickedButtonStart() {
         if (model.androidSdk.value.isEmpty()) {
@@ -119,6 +116,22 @@ class MainView : View("Mini Auto: RoK") {
             return
         }
 
-        device = adbScreen.device.deviceSerial
+        setupGameController()
+    }
+
+    // Navigation
+
+    private fun openSettings() {
+        val settingsView = find<SettingsView>()
+        replaceWith(settingsView, sizeToScene = true, centerOnScreen = true)
+    }
+
+    private fun showAlert(title: String, message: String) {
+        val alert = Alert(Alert.AlertType.ERROR)
+        val stage = alert.dialogPane.scene.window as Stage
+        stage.isAlwaysOnTop = true
+        alert.title = title
+        alert.contentText = message
+        alert.show()
     }
 }

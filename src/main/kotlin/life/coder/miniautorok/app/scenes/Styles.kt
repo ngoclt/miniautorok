@@ -25,7 +25,7 @@ class Styles : Stylesheet() {
 
         container {
             alignment = Pos.TOP_CENTER
-            backgroundImage += URI("/background.jpg")
+            backgroundImage += URI("/images/background.jpg")
             padding = box(10.px)
         }
 
