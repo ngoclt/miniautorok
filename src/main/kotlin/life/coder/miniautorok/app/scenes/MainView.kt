@@ -1,35 +1,38 @@
 package life.coder.miniautorok.app.scenes
 
 import javafx.collections.FXCollections
+import javafx.scene.control.Alert
 import javafx.scene.layout.Priority
 import life.coder.miniautorok.app.viewmodels.AppSettingsModel
-import org.sikuli.android.ADBClient
 import tornadofx.*
 
 import org.sikuli.android.ADBScreen
 import org.sikuli.basics.Settings
+import javafx.stage.Stage
+
+
 
 class MainView : View("Mini Auto: RoK") {
 
-    val resourceTypes = FXCollections.observableArrayList("Food",
+    private val resourceTypes = FXCollections.observableArrayList("Food",
             "Wood", "Stone", "Gold")
-    val resourceLevels = FXCollections.observableArrayList(1,
+    private val resourceLevels = FXCollections.observableArrayList(1,
             2, 3, 4, 5, 6)
 
-    var devices = FXCollections.emptyObservableList<String>()
+    private var device = ""
+
+    private lateinit var adbScreen: ADBScreen
+
+    private val model = AppSettingsModel()
 
     init {
         Settings.DebugLogs = true
-        val adbScreen = ADBScreen("D:\\Program Files\\Nox\\bin\\nox_adb.exe")
-
-        ADBClient.get
-
-        devices = FXCollections.observableArrayList(adbScreen.devices.map { it.toString() })
-        print(adbScreen.devices)
-        print(adbScreen.device.toString())
+        if (model.androidSdk.value.isNotEmpty()) {
+            adbScreen = ADBScreen(model.androidSdk.value)
+            device = adbScreen.device.toString()
+        }
     }
 
-    private val model = AppSettingsModel()
 
     override val root = vbox {
         addClass(Styles.container)
@@ -56,10 +59,8 @@ class MainView : View("Mini Auto: RoK") {
                     }
                 }
 
-                field("Select Device:") {
-                    combobox<String> {
-                        items = devices
-                    }
+                field("Connected Device:") {
+                    label(if (device.isEmpty()) "Please connect device" else device)
                 }
             }
 
@@ -84,7 +85,9 @@ class MainView : View("Mini Auto: RoK") {
 
                 field {
                     button("Start") {
-
+                        action {
+                            clickedButtonStart()
+                        }
                     }
                 }
             }
@@ -94,5 +97,28 @@ class MainView : View("Mini Auto: RoK") {
     private fun openSettings() {
         val settingsView = find<SettingsView>()
         replaceWith(settingsView, sizeToScene = true, centerOnScreen = true)
+    }
+
+    private fun showAlert(title: String, message: String) {
+        val alert = Alert(Alert.AlertType.ERROR)
+        val stage = alert.dialogPane.scene.window as Stage
+        stage.isAlwaysOnTop = true
+        alert.title = title
+        alert.contentText = message
+        alert.show()
+    }
+
+    private fun clickedButtonStart() {
+        if (model.androidSdk.value.isEmpty()) {
+            showAlert("Error", "Please config the path to your nox_adb.exe!")
+            return
+        }
+
+        if (adbScreen.device == null) {
+            showAlert("Error", "Please make sure you set correctly the ADB path and your device is connected!")
+            return
+        }
+
+        device = adbScreen.device.deviceSerial
     }
 }
