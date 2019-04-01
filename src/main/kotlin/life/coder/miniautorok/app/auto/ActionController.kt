@@ -4,9 +4,15 @@ import org.sikuli.android.ADBScreen
 import org.sikuli.basics.Debug
 import org.sikuli.script.Location
 
-class ActionBarController(private val screen: ADBScreen) {
+class ActionController(private val screen: ADBScreen) {
 
-    fun resetScreenIfNeeded() {
+    var isOutOfTroop = false
+
+    private fun resetScreenIfNeeded() {
+        if (screen.has("button_close_dialog.png")) {
+            screen.click("button_close_dialog.png")
+        }
+
         if (!screen.has("map.png") && !screen.has("city.png")) {
             screen.click()
             try {
@@ -69,7 +75,7 @@ class ActionBarController(private val screen: ADBScreen) {
         return false
     }
 
-    fun searchBarbarian(): Boolean {
+    fun searchOnMap(type: Int): Boolean {
 
         if (!openMap()) {
             return false
@@ -79,19 +85,32 @@ class ActionBarController(private val screen: ADBScreen) {
             return false
         }
 
+        var itemImage: String = imageFor(type)
+
         try {
-            screen.click("search_barbarians.png")
+            screen.wait(itemImage)
+            screen.click(itemImage)
             screen.wait("button_search.png")
             screen.click("button_search.png")
             screen.wait("search_arrow.png")
             screen.click(screen.center)
 
-
         } catch (e: Exception) {
-            Debug.error("Cannot search barbarian: " + e.localizedMessage)
+            Debug.error("Cannot search item: " + e.localizedMessage)
         }
 
         return false
+    }
+
+    private fun imageFor(type: Int): String {
+        when (type) {
+            1 -> return "search_corn.png"
+            2 -> return "search_wood.png"
+            3 -> return "search_stone.png"
+            else -> {
+                return "search_barbarians.png"
+            }
+        }
     }
 
     fun attackBarbarian() {
@@ -110,7 +129,39 @@ class ActionBarController(private val screen: ADBScreen) {
         } catch (e: Exception) {
             Debug.error("Cannot find search button: " + e.localizedMessage)
         }
+    }
 
+    fun gather(type: Int): Boolean {
+        try {
+            searchOnMap(type)
+
+            screen.wait("button_gather.png")
+            screen.click("button_gather.png")
+
+            screen.wait("button_new_troops.png")
+            screen.click("button_new_troops.png")
+
+            if (!screen.has("no_troop.png")) {
+                screen.wait("button_marching_army.png")
+                screen.click("button_marching_army.png")
+                isOutOfTroop = false
+                return true
+            }  else {
+                isOutOfTroop = true
+            }
+
+            if (screen.has("button_close_dialog.png")) {
+                screen.click("button_close_dialog.png")
+            }
+
+            return false
+
+        } catch (e: Exception) {
+            Debug.error("Cannot gather item: " + type + e.localizedMessage)
+
+        }
+
+        return false
     }
 
     fun setLevelForSearch(level: Int): Boolean {
@@ -131,6 +182,21 @@ class ActionBarController(private val screen: ADBScreen) {
         }
 
         return true
+    }
+
+    fun countNumberOfArmies(): Int {
+        try {
+            screen.click("button_army_info.png")
+
+            val returnButtons = screen.findAll("button_return_army.png").asSequence().toList()
+            val armiesInQueue = returnButtons.count()
+
+            screen.click("button_close_dialog.png")
+
+            return armiesInQueue
+        } catch (e: Exception) {
+        }
+        return 0
     }
 
     companion object {

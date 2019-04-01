@@ -10,12 +10,19 @@ import org.sikuli.android.ADBScreen
 import org.sikuli.basics.Settings
 import javafx.stage.Stage
 import life.coder.miniautorok.app.auto.GameController
+import org.sikuli.basics.Debug
+import org.sikuli.script.ImagePath
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+
+
 
 
 class MainView : View("Mini Auto: RoK") {
 
     private val resourceTypes = FXCollections.observableArrayList("Food",
-            "Wood", "Stone", "Gold")
+            "Wood", "Stone")
     private val resourceLevels = FXCollections.observableArrayList(1,
             2, 3, 4, 5, 6)
 
@@ -27,11 +34,13 @@ class MainView : View("Mini Auto: RoK") {
 
     init {
         Settings.DebugLogs = true
-        Settings.MinSimilarity = 0.9
+        Settings.AutoWaitTimeout = 5.0f
 
         if (model.androidSdk.value.isNotEmpty()) {
             adbScreen = ADBScreen(model.androidSdk.value)
-            device = adbScreen.device.toString()
+            if (adbScreen.device != null) {
+                device = adbScreen.device.toString()
+            }
         }
     }
 
@@ -79,6 +88,12 @@ class MainView : View("Mini Auto: RoK") {
                     }
                 }
 
+                field("Number of armies:") {
+                    textfield {
+
+                    }
+                }
+
                 field("Auto time:") {
                     textfield {
 
@@ -91,6 +106,11 @@ class MainView : View("Mini Auto: RoK") {
                             clickedButtonStart()
                         }
                     }
+                    button("Stop") {
+                        action {
+                            clickedButtonStop()
+                        }
+                    }
                 }
             }
         }
@@ -100,7 +120,6 @@ class MainView : View("Mini Auto: RoK") {
 
     private fun setupGameController() {
         GameController.instance.setScreen(adbScreen)
-        GameController.instance.switchToMap()
     }
 
     // Actions
@@ -117,6 +136,11 @@ class MainView : View("Mini Auto: RoK") {
         }
 
         setupGameController()
+        GameController.instance.autoGather()
+    }
+
+    private fun clickedButtonStop() {
+        GameController.instance.stopAutoGather()
     }
 
     // Navigation
