@@ -2,6 +2,7 @@ package life.coder.miniautorok.app.auto
 
 import org.sikuli.android.ADBScreen
 import org.sikuli.basics.Debug
+import org.sikuli.basics.Settings
 import org.sikuli.script.Location
 
 class ActionController(private val screen: ADBScreen) {
@@ -9,19 +10,19 @@ class ActionController(private val screen: ADBScreen) {
     var isOutOfTroop = false
 
     private fun resetScreenIfNeeded() {
-        if (screen.has("button_close_dialog.png")) {
-            screen.click("button_close_dialog.png")
-        }
-
-        if (!screen.has("map.png") && !screen.has("city.png")) {
-            screen.click()
-            try {
-                screen.wait(3000)
-            } catch (e: Exception) {
-                Debug.error(e.localizedMessage)
+        try {
+            if (screen.has("button_close_dialog.png")) {
+                screen.click("button_close_dialog.png")
             }
 
+            if (!screen.has("map.png") && !screen.has("city.png")) {
+                screen.click()
+                screen.wait(3000)
+            }
+        } catch (e: Exception) {
+            Debug.error(e.localizedMessage)
         }
+
     }
 
     fun openMap(): Boolean {
@@ -76,10 +77,6 @@ class ActionController(private val screen: ADBScreen) {
     }
 
     fun searchOnMap(type: Int): Boolean {
-
-        if (!openMap()) {
-            return false
-        }
 
         if (!clickSearch()) {
             return false
@@ -157,7 +154,7 @@ class ActionController(private val screen: ADBScreen) {
             return false
 
         } catch (e: Exception) {
-            Debug.error("Cannot gather item: " + type + e.localizedMessage)
+            Debug.error("Cannot gather, error: " + e.localizedMessage)
 
         }
 
@@ -188,15 +185,46 @@ class ActionController(private val screen: ADBScreen) {
         try {
             screen.click("button_army_info.png")
 
-            val returnButtons = screen.findAll("button_return_army.png").asSequence().toList()
+            val returnButtons = screen.findAll("dialog_button_troop_info.png").asSequence().toList()
             val armiesInQueue = returnButtons.count()
 
             screen.click("button_close_dialog.png")
+
+            Debug.info("Number of armies on map: $armiesInQueue")
 
             return armiesInQueue
         } catch (e: Exception) {
         }
         return 0
+    }
+
+    fun verifyCaptcha(): Boolean {
+        if (!screen.has("button_verify.png")) {
+            return true
+        }
+
+        try {
+            screen.click("button_verify.png")
+
+            screen.wait("captcha_loading.png", 15.0)
+            screen.wait("captcha_drag_indicator.png", 15.0)
+
+            Settings.MinSimilarity = 0.5
+
+            val piece = screen.find("captcha_piece.png")
+            val target = screen.find("captcha_target.png")
+
+            screen.dragDrop(piece, target)
+
+            Settings.MinSimilarity = 0.7
+
+
+            return true
+        } catch (e: Exception) {
+            Debug.error("Failed to verify captcha")
+            Debug.error(e.localizedMessage)
+        }
+        return false
     }
 
     companion object {

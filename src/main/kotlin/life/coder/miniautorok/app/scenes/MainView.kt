@@ -1,7 +1,11 @@
 package life.coder.miniautorok.app.scenes
 
+import javafx.beans.property.IntegerProperty
+import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.scene.control.Alert
+import javafx.scene.control.ComboBox
 import javafx.scene.layout.Priority
 import life.coder.miniautorok.app.viewmodels.AppSettingsModel
 import tornadofx.*
@@ -25,10 +29,20 @@ class MainView : View("Mini Auto: RoK") {
             "Wood", "Stone")
     private val resourceLevels = FXCollections.observableArrayList(1,
             2, 3, 4, 5, 6)
+    private val availableArmies = FXCollections.observableArrayList(1,
+            2, 3, 4, 5)
+    private val autoTimes = FXCollections.observableArrayList(1,
+            2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24)
+
 
     private var device = ""
 
     private lateinit var adbScreen: ADBScreen
+
+    private lateinit var cbRssType: ComboBox<String>
+    private lateinit var cbRssLevel: ComboBox<Int>
+    private lateinit var cbArmies: ComboBox<Int>
+    private lateinit var cbTime: ComboBox<Int>
 
     private val model = AppSettingsModel()
 
@@ -36,7 +50,7 @@ class MainView : View("Mini Auto: RoK") {
         Settings.DebugLogs = true
         Settings.AutoWaitTimeout = 5.0f
 
-        if (model.androidSdk.value.isNotEmpty()) {
+        if (model.androidSdk.value != null) {
             adbScreen = ADBScreen(model.androidSdk.value)
             if (adbScreen.device != null) {
                 device = adbScreen.device.toString()
@@ -77,26 +91,31 @@ class MainView : View("Mini Auto: RoK") {
 
             fieldset("Gathering") {
                 field("Type:") {
-                    combobox<String> {
+                    cbRssType = combobox {
+                        addClass(Styles.combobox)
                         items = resourceTypes
+
                     }
                 }
 
                 field("Level:") {
-                    combobox<Int> {
+                    cbRssLevel = combobox {
+                        addClass(Styles.combobox)
                         items = resourceLevels
                     }
                 }
 
                 field("Number of armies:") {
-                    textfield {
-
+                    cbArmies = combobox {
+                        addClass(Styles.combobox)
+                        items = availableArmies
                     }
                 }
 
-                field("Auto time:") {
-                    textfield {
-
+                field("Auto time (hours):") {
+                    cbTime = combobox {
+                        addClass(Styles.combobox)
+                        items = autoTimes
                     }
                 }
 
@@ -125,8 +144,19 @@ class MainView : View("Mini Auto: RoK") {
     // Actions
 
     private fun clickedButtonStart() {
+
+        val type = cbRssType.selectedItem
+        val level = cbRssLevel.selectedItem
+        val armies = cbArmies.selectedItem
+        val time = cbTime.selectedItem
+
+        if (type == null || level == null || armies == null || time == null) {
+            showAlert("Error", "Please input the auto configuration.")
+            return
+        }
+
         if (model.androidSdk.value.isEmpty()) {
-            showAlert("Error", "Please config the path to your nox_adb.exe!")
+            showAlert("Error", "Please setup the path to your nox_adb.exe!")
             return
         }
 
@@ -136,7 +166,9 @@ class MainView : View("Mini Auto: RoK") {
         }
 
         setupGameController()
-        GameController.instance.autoGather()
+        GameController.instance.autoGather(type, level, armies, time)
+
+//        GameController.instance.verify()
     }
 
     private fun clickedButtonStop() {

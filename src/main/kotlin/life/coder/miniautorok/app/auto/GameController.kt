@@ -11,8 +11,8 @@ class GameController {
 
     private var screen: ADBScreen? = null
 
-    private var maximumNumberOfArmies = 2
-
+    private var maximumNumberOfArmies = 1
+    private var gatheringType = 1
 
     private var currentNumberOfArmies = 0
     private var isOutOfTroop = false
@@ -42,6 +42,17 @@ class GameController {
         Debug.info("Load images from: " + ImagePath.getBundlePath())
     }
 
+    private fun rssType(type: String): Int {
+        when (type) {
+            "Food" -> return 1
+            "Wood" -> return 2
+            "Stone" -> return 3
+            else -> {
+                return 1
+            }
+        }
+    }
+
     fun reset() {
         currentNumberOfArmies = 0
         isOutOfTroop = false
@@ -56,15 +67,22 @@ class GameController {
         actionController.openCity()
     }
 
-    private fun doGathering() {
+    private fun doGathering(type: Int) {
         switchToMap()
+        gatheringType = type
         currentNumberOfArmies = actionController.countNumberOfArmies()
-        if (currentNumberOfArmies >= maximumNumberOfArmies
-                || (isOutOfTroop && troopFullAtNumberOfArmy == currentNumberOfArmies)) {
+        if (currentNumberOfArmies >= maximumNumberOfArmies) {
+            autoGatherService?.shutdown()
+            autoGatherService = null
+
+            checkArmyService = Executors.newSingleThreadScheduledExecutor()
+            checkArmyService?.scheduleAtFixedRate({ checkArmies() }, 0, 3, TimeUnit.MINUTES)
+
             return
         }
 
-        val sentFarmerSuccessfully = actionController.gather(1)
+        val sentFarmerSuccessfully = actionController.gather(type)
+        switchToCity()
 
         if (!sentFarmerSuccessfully) {
             isOutOfTroop = actionController.isOutOfTroop
@@ -72,24 +90,40 @@ class GameController {
         }
     }
 
+    private fun checkArmies() {
+        currentNumberOfArmies = actionController.countNumberOfArmies()
+        if (currentNumberOfArmies < maximumNumberOfArmies) {
+            checkArmyService?.shutdown()
+            checkArmyService = null
+
+            autoGatherService = Executors.newSingleThreadScheduledExecutor()
+            autoGatherService?.scheduleAtFixedRate({ doGathering(gatheringType) }, 0, 60, TimeUnit.SECONDS)
+
+            return
+        }
+    }
+
     // Game helper
     private var autoGatherService: ScheduledExecutorService? = null
+    private var checkArmyService: ScheduledExecutorService? = null
 
-    fun autoGather() {
+
+    fun autoGather(type: String, level: Int, armies: Int, time: Int) {
+        maximumNumberOfArmies = armies
         autoGatherService = Executors.newSingleThreadScheduledExecutor()
-        autoGatherService?.scheduleAtFixedRate({ doGathering() }, 0, 30, TimeUnit.SECONDS)
+        autoGatherService?.scheduleAtFixedRate({ doGathering(rssType(type)) }, 0, 60, TimeUnit.SECONDS)
     }
 
     fun stopAutoGather() {
         autoGatherService?.shutdown()
         autoGatherService = null
+
+        checkArmyService?.shutdown()
+        checkArmyService = null
     }
 
-    fun numberOfArmiesOnMap(): Int {
-        Debug.info("Checking number of armies on map")
-        currentNumberOfArmies = actionController.countNumberOfArmies()
-        Debug.info("Number of armies on map: $currentNumberOfArmies")
-        return currentNumberOfArmies
+    fun verify() {
+        actionController.verifyCaptcha()
     }
 }
 

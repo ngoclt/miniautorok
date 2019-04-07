@@ -14,6 +14,7 @@ class Styles : Stylesheet() {
         val heading by cssclass()
         val title by cssclass()
         val content by cssclass()
+        val combobox by cssclass()
 
         val wrapperColor = c("white", 0.5)
     }
@@ -44,6 +45,11 @@ class Styles : Stylesheet() {
             fontSize = 24.px
         }
 
-
+        combobox {
+            prefWidth = 150.px
+            listView {
+                prefWidth = 150.px
+            }
+        }
     }
 }
